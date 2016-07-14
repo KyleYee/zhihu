@@ -4,15 +4,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.zhihu.kyleyee.myapplication.R;
-import com.zhihu.kyleyee.myapplication.apiManager.ApiManager;
+import com.zhihu.kyleyee.myapplication.Manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
-import com.zhihu.kyleyee.myapplication.model.StartModel;
-
-import java.util.Objects;
+import com.zhihu.kyleyee.myapplication.model.New;
+import com.zhihu.kyleyee.myapplication.model.Start;
 
 import butterknife.Bind;
 
@@ -24,6 +25,8 @@ import butterknife.Bind;
  */
 public class StartActivity extends BaseActivity {
 
+    public static final String NEW_BUNDLE = "new_bundle";
+
     @Bind(R.id.start_txt_text)
     TextView mStart;
 
@@ -31,8 +34,11 @@ public class StartActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            MainActivity.startMainActivity(StartActivity.this);
+            Bundle bundle = msg.getData();
+            New newData = (New) bundle.getSerializable(NEW_BUNDLE);
+            MainActivity.startMainActivity(StartActivity.this, newData);
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
+            finish();
         }
     };
 
@@ -45,30 +51,50 @@ public class StartActivity extends BaseActivity {
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         ApiManager.getInstance().getStartImg(new ApiManager.ResultCallBack() {
+
             @Override
-            public void onTaskSuccess(StartModel data) {
-                mStart.setText(data.getText());
-                Uri uri = Uri.parse(data.getImg());
+            public void onTaskSuccess(Object data) {
+                Start model = (Start) data;
+                mStart.setText(model.getText());
+                Uri uri = Uri.parse(model.getImg());
                 SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);
                 draweeView.setImageURI(uri);
 
-                handler.postDelayed(new Runnable() {
+
+                ApiManager.getInstance().getNewList(new ApiManager.ResultCallBack() {
                     @Override
-                    public void run() {
-                        handler.sendEmptyMessage(1);
+                    public void onTaskSuccess(Object data) {
+                        New newData = (New) data;
+                        if (newData != null) {
+                            Message message = new Message();
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable(NEW_BUNDLE, newData);
+                            message.setData(bundle);
+                            handler.sendMessage(message);
+                        }
                     }
-                }, 7000);
 
+                    @Override
+                    public void onError(Object error) {
+                        Log.e("new", error.toString());
+                        Toast.makeText(StartActivity.this, error.toString(), Toast.LENGTH_SHORT);
+                    }
+
+                    @Override
+                    public void onFinal(Object data) {
+
+                    }
+                });
 
             }
 
             @Override
-            public void onError(Objects error) {
+            public void onError(Object error) {
 
             }
 
             @Override
-            public void onFinal(Objects data) {
+            public void onFinal(Object data) {
 
             }
         });
