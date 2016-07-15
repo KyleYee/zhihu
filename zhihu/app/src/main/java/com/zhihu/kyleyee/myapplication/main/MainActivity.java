@@ -3,10 +3,18 @@ package com.zhihu.kyleyee.myapplication.main;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 
+import com.zhihu.kyleyee.myapplication.Adapter.HomeAdapter;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
+
+import butterknife.Bind;
 
 /**
  * 主界面
@@ -14,8 +22,15 @@ import com.zhihu.kyleyee.myapplication.model.New;
  */
 public class MainActivity extends BaseActivity {
 
-    //最新消息
-    private New newData;
+    @Bind(R.id.toolbar_home)
+    Toolbar mToolbar;
+    @Bind(R.id.recycler_home)
+    RecyclerView mRecyclerHome;
+    @Bind(R.id.refresh_home)
+    SwipeRefreshLayout mRefreshHome;
+
+    private New mNewData;//最新消息
+    private HomeAdapter mAdapter;//最新消息适配器
 
     public static void startMainActivity(Context context, New newData) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -34,6 +49,15 @@ public class MainActivity extends BaseActivity {
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
         initData();
+        initToolbar();
+        initRecyclerView();
+    }
+
+    /**
+     * 初始化Toolbar
+     */
+    private void initToolbar() {
+        setSupportActionBar(mToolbar);
     }
 
     /**
@@ -41,7 +65,19 @@ public class MainActivity extends BaseActivity {
      */
     private void initData() {
         Intent intent = getIntent();
-        newData = (New) intent.getBundleExtra(StartActivity.NEW_BUNDLE)
+        mNewData = (New) intent.getBundleExtra(StartActivity.NEW_BUNDLE)
                 .getSerializable(StartActivity.NEW_BUNDLE);
+    }
+
+
+    /**
+     * 初始化新消息列表，ViewPager放在header中，刷新用
+     */
+    private void initRecyclerView() {
+        mAdapter = new HomeAdapter(this, mNewData);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.setOrientation(OrientationHelper.VERTICAL);
+        mRecyclerHome.setLayoutManager(layoutManager);
+        mRecyclerHome.setAdapter(mAdapter);
     }
 }

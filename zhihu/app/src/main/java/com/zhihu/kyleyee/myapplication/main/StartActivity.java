@@ -70,7 +70,7 @@ public class StartActivity extends BaseActivity {
                             Bundle bundle = new Bundle();
                             bundle.putSerializable(NEW_BUNDLE, newData);
                             message.setData(bundle);
-                            handler.sendMessage(message);
+                            handler.sendMessageDelayed(message, 2000);
                         }
                     }
 

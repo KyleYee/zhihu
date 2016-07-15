@@ -8,7 +8,11 @@ import java.util.List;
  * Created by kyleYee on 2016/7/3.
  */
 public class New implements Serializable {
-    private String date;
-    private List<Stories> stories;
-    private List<Stories> top_stories;
+
+    private static final long serialVersionUID = 4070510273198935460L;
+    public String date;
+    public List<Stories> stories;
+    public List<Stories> top_stories;
+
+
 }

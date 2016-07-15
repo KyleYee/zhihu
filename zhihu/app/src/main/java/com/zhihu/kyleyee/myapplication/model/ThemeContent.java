@@ -1,10 +1,13 @@
 package com.zhihu.kyleyee.myapplication.model;
 
+import java.io.Serializable;
+
 /**
  * 主题内容
  * Created by kyleYee on 2016/7/3.
  */
-public class ThemeContent {
+public class ThemeContent implements Serializable {
+    private static final long serialVersionUID = 1434595093415641905L;
     private Stories stories;// 该主题日报中的文章列表
     private String description;//该主题日报的介绍
     private String background;//该主题日报的背景图片（大图）
