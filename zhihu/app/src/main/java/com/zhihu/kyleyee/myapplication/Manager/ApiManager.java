@@ -140,7 +140,7 @@ public class ApiManager {
      * @param before
      * @param callBack
      */
-    public void getNewBefore(int before, final ResultCallBack callBack) {
+    public void getNewBefore(String before, final ResultCallBack callBack) {
         Call<New> call = apiService.getNewBefore(before);
 
         call.enqueue(new Callback<New>() {

@@ -12,6 +12,7 @@ import java.util.Objects;
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 /**
@@ -28,12 +29,12 @@ public interface ApiService {
     @GET("news/latest")
     Call<New> getNewList();
 
-    @GET("news/{before}")
-    Call<New> getNewBefore(@Path("before") int before);
+    @GET("news/before/{before}")
+    Call<New> getNewBefore(@Path("before") String before);
 
     @GET("themes")
     Call<Themes> getThemes();
 
-    @GET("theme/{id}")
+    @POST("theme/{id}")
     Call<Objects> getThemeContent(@Path("id") int id);
 }

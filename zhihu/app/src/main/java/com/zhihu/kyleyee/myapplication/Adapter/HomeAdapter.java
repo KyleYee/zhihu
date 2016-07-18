@@ -23,6 +23,16 @@ import butterknife.ButterKnife;
  */
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
+    public interface OnItemClickListener {
+        void onItemClick(int position, View itemView, int Id);
+    }
+
+    private OnItemClickListener mOnItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.mOnItemClickListener = onItemClickListener;
+    }
+
     private New mNewData;//最新消息数据
     private Context mContext;
     private LayoutInflater mInflater;
@@ -40,10 +50,18 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
     }
 
     @Override
-    public void onBindViewHolder(HomeHolder holder, int position) {
-        Stories stories = mNewData.stories.get(position);
+    public void onBindViewHolder(final HomeHolder holder, final int position) {
+        final Stories stories = mNewData.stories.get(position);
         holder.image.setImageURI(Uri.parse(stories.images.get(0)));
         holder.des.setText(stories.title);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mOnItemClickListener != null) {
+                    mOnItemClickListener.onItemClick(position, v, stories.id);
+                }
+            }
+        });
     }
 
     @Override
