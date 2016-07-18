@@ -1,12 +1,12 @@
 package com.zhihu.kyleyee.myapplication.Adapter;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -23,6 +23,9 @@ import butterknife.ButterKnife;
  */
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
+    public static final int TYPE_HEADER = 1;
+    public static final int TYPE_COMMENT = 0;
+
     public interface OnItemClickListener {
         void onItemClick(int position, View itemView, int Id);
     }
@@ -36,6 +39,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
     private New mNewData;//最新消息数据
     private Context mContext;
     private LayoutInflater mInflater;
+    private View mHeaderView;
 
     public HomeAdapter(Context context, New newData) {
         this.mNewData = newData;
@@ -43,14 +47,29 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
         mInflater = LayoutInflater.from(mContext);
     }
 
+    public void setHeaderView(View view) {
+        mHeaderView = view;
+        notifyItemInserted(0);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mHeaderView == null) return TYPE_COMMENT;
+        if (position == 0) return TYPE_HEADER;
+        return TYPE_COMMENT;
+    }
+
     @Override
     public HomeAdapter.HomeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (mHeaderView != null && viewType == TYPE_HEADER)
+            return new HomeAdapter.HomeHolder(mHeaderView);
         View v = mInflater.inflate(R.layout.item_home_cardview, parent, false);
         return new HomeAdapter.HomeHolder(v);
     }
 
     @Override
     public void onBindViewHolder(final HomeHolder holder, final int position) {
+        if (mHeaderView != null && getItemViewType(position) == TYPE_HEADER) return;
         final Stories stories = mNewData.stories.get(position);
         holder.image.setImageURI(Uri.parse(stories.images.get(0)));
         holder.des.setText(stories.title);
@@ -58,7 +77,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
             @Override
             public void onClick(View v) {
                 if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick(position, v, stories.id);
+                    mOnItemClickListener.onItemClick(getPosition(position), v, stories.id);
                 }
             }
         });
@@ -66,7 +85,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
     @Override
     public int getItemCount() {
-        return mNewData.stories.size();
+        return mHeaderView == null ? (mNewData.stories.size() + 1) : mNewData.stories.size();
+    }
+
+    public int getPosition(int position) {
+        return mHeaderView == null ? position : position + 1;
     }
 
     class HomeHolder extends RecyclerView.ViewHolder {
@@ -77,6 +100,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
         public HomeHolder(View itemView) {
             super(itemView);
+            if (itemView == mHeaderView) return;
             ButterKnife.bind(this, itemView);
         }
     }

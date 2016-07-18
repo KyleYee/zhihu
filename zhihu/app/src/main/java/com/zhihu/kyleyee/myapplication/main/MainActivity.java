@@ -2,6 +2,7 @@ package com.zhihu.kyleyee.myapplication.main;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -11,8 +12,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.zhihu.kyleyee.myapplication.Adapter.HomeAdapter;
 import com.zhihu.kyleyee.myapplication.Manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.R;
@@ -88,6 +91,13 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         layoutManager.setOrientation(OrientationHelper.VERTICAL);
         mRecyclerHome.setLayoutManager(layoutManager);
         mRecyclerHome.setAdapter(mAdapter);
+        SimpleDraweeView image = new SimpleDraweeView(this);
+        image.setImageURI(Uri.parse(mNewData.top_stories.get(0).image));
+        image.onFinishTemporaryDetach();
+        ImageView imageView = new ImageView(this);
+        imageView.setBackgroundResource(R.drawable.ic_home_black_24dp);
+        mAdapter.setHeaderView(imageView);
+
         mAdapter.setOnItemClickListener(this);
         mRecyclerHome.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
