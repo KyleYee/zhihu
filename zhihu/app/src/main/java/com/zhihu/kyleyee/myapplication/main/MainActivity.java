@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,6 +17,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -29,6 +31,7 @@ import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
 
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 import butterknife.Bind;
@@ -37,8 +40,9 @@ import butterknife.Bind;
  * 主界面
  * Created by kyleYee on 2016/6/29.
  */
-public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClickListener {
+public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClickListener, ViewPager.OnPageChangeListener {
 
+    private static final int DELAY_MILLIS = 4000;
     @Bind(R.id.toolbar_home)
     Toolbar mToolbar;
     @Bind(R.id.recycler_home)
@@ -52,6 +56,28 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private String beforeDate = "0";//过去时间
     private HomeViewpagerAdapter mViewpagerAdapter;//轮播图适配器
     private List<View> mListView;//轮播图 图片集合
+    private List<View> mPointView;//轮播图下方小点
+    private View mBeforePoint;//切换前的小点
+
+    private ViewPager mViewpager;
+
+    private Handler mPagerHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (mViewpager == null) {
+                return;
+            }
+            mViewpager.setCurrentItem(msg.what, true);
+            if (msg.what == mNewData.top_stories.size()) {
+                msg.what = 0;
+            } else {
+                msg.what += 1;
+            }
+            mPagerHandler.sendEmptyMessageDelayed(msg.what, DELAY_MILLIS);
+
+        }
+    };
 
     public static void startMainActivity(Context context, New newData) {
         Intent intent = new Intent(context, MainActivity.class);
@@ -100,12 +126,22 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private void initRecyclerView() {
         beforeDate = mNewData.date;
         mAdapter = new HomeAdapter(this, mNewData);
-        final LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(OrientationHelper.VERTICAL);
         mRecyclerHome.setLayoutManager(layoutManager);
         //设置轮播图
         initViewpager();
         mAdapter.setOnItemClickListener(this);
+        loadMore(layoutManager);
+        mRecyclerHome.setAdapter(mAdapter);
+    }
+
+    /**
+     * 加载更多
+     *
+     * @param layoutManager
+     */
+    private void loadMore(final LinearLayoutManager layoutManager) {
         mRecyclerHome.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -145,7 +181,6 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        mRecyclerHome.setAdapter(mAdapter);
     }
 
     /**
@@ -175,6 +210,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                 mNewData = (New) data;
                 if (mNewData != null) {
                     mListView = null;
+                    mPointView = null;
                     initRecyclerView();
                 }
             }
@@ -199,19 +235,28 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private void initViewpager() {
         //要添加带轮播图上的图片
         mListView = new ArrayList<>();
+        mPointView = new ArrayList<>();
         View pagerLayout = LayoutInflater.from(this).inflate(R.layout.item_home_viewpager, null);
-        ViewPager viewpager = (ViewPager) pagerLayout.findViewById(R.id.home_viewpager);
+        mViewpager = (ViewPager) pagerLayout.findViewById(R.id.home_viewpager);
+        LinearLayout viewpagerPoint = (LinearLayout) pagerLayout.findViewById(R.id.ll_viewpager_point);
 
         int with = getWindowManager().getDefaultDisplay().getWidth();
         float height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
         for (int i = 0; i < mNewData.top_stories.size(); i++) {
-            View view = LayoutInflater.from(this).inflate(R.layout.item_viewpager_iamge, viewpager, false);
+            View view = LayoutInflater.from(this).inflate(R.layout.item_viewpager_iamge, mViewpager, false);
+            View point = LayoutInflater.from(this).inflate(R.layout.item_viewpager_point, viewpagerPoint, false);
+            if (i == 0) {
+                point.setBackgroundResource(R.drawable.point_whit);
+                mBeforePoint = point;
+            }
+            mPointView.add(point);
             mListView.add(view);
+            viewpagerPoint.addView(point);
         }
         mViewpagerAdapter = new HomeViewpagerAdapter(mListView);
         //有Viewpager的布局
 //        ViewPager viewpager = (ViewPager) findViewById(R.id.viewpager);
-        viewpager.setAdapter(mViewpagerAdapter);
+        mViewpager.setAdapter(mViewpagerAdapter);
         mAdapter.setHeaderView(pagerLayout);
         for (int i = 0; i < mNewData.top_stories.size(); i++) {
             ImageView draweeView = (ImageView) mListView.get(i).findViewById(R.id.home_viewpager_image);
@@ -221,6 +266,17 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                     .centerCrop()
                     .into(draweeView);
         }
+
+        //设置viewpager监听事件
+        mViewpager.addOnPageChangeListener(this);
+
+        //设置自动轮播
+        setAutoPlay();
+    }
+
+    //自动轮播
+    private void setAutoPlay() {
+        mPagerHandler.sendEmptyMessageDelayed(1, DELAY_MILLIS);
     }
 
     /**
@@ -233,5 +289,30 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     @Override
     public void onItemClick(int position, View itemView, int Id) {
         Toast.makeText(this, mNewData.stories.get(position).title, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * viewpager页卡切换监听
+     *
+     * @param position
+     * @param positionOffset
+     * @param positionOffsetPixels
+     */
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        mPointView.get(position).setBackgroundResource(R.drawable.point_whit);
+        mBeforePoint.setBackgroundResource(R.drawable.point);
+        mBeforePoint = mPointView.get(position);
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
+
     }
 }
