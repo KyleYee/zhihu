@@ -20,8 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by kyleYee on 2016/6/24.
  */
 public class ApiManager {
-    public static final String API_BASE_URL = "http://news-at.zhihu.com/api/4";
-
     private static volatile ApiManager apiManager;
 
     private ApiManager() {
@@ -54,7 +52,7 @@ public class ApiManager {
 
         void onError(Object error);
 
-        void onFinal(Object data);
+        void onFinish();
     }
 
     /**
@@ -74,11 +72,13 @@ public class ApiManager {
                 } else {
                     callBack.onError("error：" + response.message());
                 }
+                callBack.onFinish();
             }
 
             @Override
             public void onFailure(Call<Start> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
+                callBack.onFinish();
             }
         });
     }
@@ -98,11 +98,13 @@ public class ApiManager {
                 } else {
                     callBack.onError("error：" + response.message());
                 }
+                callBack.onFinish();
             }
 
             @Override
             public void onFailure(Call<Version> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
+                callBack.onFinish();
             }
         });
     }
@@ -124,11 +126,13 @@ public class ApiManager {
                 } else {
                     callBack.onError("error：" + response.message());
                 }
+                callBack.onFinish();
             }
 
             @Override
             public void onFailure(Call<New> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
+                callBack.onFinish();
             }
         });
     }
@@ -147,14 +151,17 @@ public class ApiManager {
             @Override
             public void onResponse(Call<New> call, Response<New> response) {
                 if (response.isSuccessful()) {
-                    callBack.onTaskSuccess((New) response.body());
+                    callBack.onTaskSuccess(response.body());
+                } else {
+                    callBack.onError("error：" + response.message());
                 }
-                callBack.onError("error：" + response.message());
+                callBack.onFinish();
             }
 
             @Override
             public void onFailure(Call<New> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
+                callBack.onFinish();
             }
         });
     }
@@ -174,11 +181,13 @@ public class ApiManager {
                     callBack.onTaskSuccess((Themes) response.body());
                 }
                 callBack.onError("error：" + response.message());
+                callBack.onFinish();
             }
 
             @Override
             public void onFailure(Call<Themes> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
+                callBack.onFinish();
             }
         });
     }

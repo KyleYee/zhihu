@@ -76,14 +76,13 @@ public class StartActivity extends BaseActivity {
 
                     @Override
                     public void onError(Object error) {
-                        Log.e("new", error.toString());
-                        Toast.makeText(StartActivity.this, error.toString(), Toast.LENGTH_SHORT);
                     }
 
                     @Override
-                    public void onFinal(Object data) {
+                    public void onFinish() {
 
                     }
+
                 });
 
             }
@@ -94,7 +93,7 @@ public class StartActivity extends BaseActivity {
             }
 
             @Override
-            public void onFinal(Object data) {
+            public void onFinish() {
 
             }
         });

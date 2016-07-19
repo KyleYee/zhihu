@@ -31,13 +31,12 @@ public class HomeViewpagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View view = mListView.get(position);
-        container.addView(view);
-        return view;
+        container.addView(mListView.get(position));
+        return mListView.get(position);
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        container.removeView(mListView.get(position));
+        container.removeView((View) object);
     }
 }

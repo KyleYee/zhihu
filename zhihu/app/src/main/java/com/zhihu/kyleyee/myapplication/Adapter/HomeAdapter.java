@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -25,6 +26,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
     public static final int TYPE_HEADER = 1;
     public static final int TYPE_COMMENT = 0;
+
+    private int mHeadCount = 0;
 
     public interface OnItemClickListener {
         void onItemClick(int position, View itemView, int Id);
@@ -49,6 +52,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
     public void setHeaderView(View view) {
         mHeaderView = view;
+        mHeadCount = 1;
         notifyItemInserted(0);
     }
 
@@ -69,15 +73,17 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
     @Override
     public void onBindViewHolder(final HomeHolder holder, final int position) {
-        if (mHeaderView != null && getItemViewType(position) == TYPE_HEADER) return;
-        final Stories stories = mNewData.stories.get(position);
+        if (mHeaderView != null && getItemViewType(position) == TYPE_HEADER) {
+            return;
+        }
+        final Stories stories = mNewData.stories.get(position - mHeadCount);
         holder.image.setImageURI(Uri.parse(stories.images.get(0)));
         holder.des.setText(stories.title);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick(getPosition(position), v, stories.id);
+                    mOnItemClickListener.onItemClick(position - mHeadCount, v, stories.id);
                 }
             }
         });
@@ -85,13 +91,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
 
     @Override
     public int getItemCount() {
-        return mHeaderView == null ? (mNewData.stories.size() + 1) : mNewData.stories.size();
+        return mHeaderView != null ? (mNewData.stories.size() + mHeadCount) : mNewData.stories.size();
     }
-
-    public int getPosition(int position) {
-        return mHeaderView == null ? position : position + 1;
-    }
-
+    
     class HomeHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.card_home_text)
         TextView des;
