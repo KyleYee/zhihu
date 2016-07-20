@@ -1,10 +1,13 @@
 package com.zhihu.kyleyee.myapplication.main;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -34,8 +37,10 @@ import com.zhihu.kyleyee.myapplication.model.Themes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * 主界面
@@ -54,6 +59,9 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     NavigationView mNavigation;
     @Bind(R.id.drawer)
     DrawerLayout mDrawer;
+    @Bind(R.id.back_top)
+    FloatingActionButton mBackTop;
+
     private New mNewData;//最新消息
     private HomeAdapter mAdapter;//最新消息适配器
     private boolean mLoadingMore = false;//正在加载更多
@@ -66,6 +74,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private boolean isScrolling = false;//是否正手动在滑动
     private ViewPager mViewpager;
     private LinearLayoutManager mLayoutManager;
+    private boolean mBackTopIsShow = false;
     /**
      * 自动轮播
      */
@@ -155,17 +164,6 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         });
     }
 
-/*    *//**
-     * 初始化数据
-     *//*
-    private void initData() {
-        Intent intent = getIntent();
-        mNewData = (New) intent.getBundleExtra(StartActivity.NEW_BUNDLE)
-                .getSerializable(StartActivity.NEW_BUNDLE);
-        beforeDate = mNewData.date;
-    }*/
-
-
     /**
      * 初始化新消息列表，ViewPager放在header中，刷新用
      */
@@ -175,7 +173,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         mNewData.stories.get(0).date = beforeDate;
         mAdapter = new HomeAdapter(this, mNewData);
         mAdapter.setData(mNewData);
-        mLayoutManager= new LinearLayoutManager(this);
+        mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
         mRecyclerHome.setLayoutManager(mLayoutManager);
         //设置轮播图
@@ -239,13 +237,44 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         int currentPosition = layoutManager.findFirstVisibleItemPosition();
         if (currentPosition == 0) {
             mToolbar.setTitle("首页");
+            if (mBackTopIsShow) {
+                setGoneAnimation(mBackTop);
+                mBackTopIsShow = false;
+            }
             return;
+        }
+
+        if (!mBackTopIsShow) {
+            setVisiblityAnimation(mBackTop);
+            mBackTopIsShow = true;
         }
         View view = mRecyclerHome.getChildAt(0);
         TextView date = (TextView) view.findViewById(R.id.date);
         if (date != null && date.getText() != null && !date.getText().equals("")) {
             mToolbar.setTitle(date.getText());
         }
+    }
+
+    /**
+     * 显示动画
+     *
+     * @param mBackTopIsShow
+     */
+    private void setVisiblityAnimation(FloatingActionButton mBackTopIsShow) {
+        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 0, 1);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), -80);
+        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
+    }
+
+    /**
+     * 隐藏动画
+     *
+     * @param mBackTop
+     */
+    private void setGoneAnimation(FloatingActionButton mBackTop) {
+        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 1, 0);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), 80);
+        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
     }
 
 
@@ -357,6 +386,11 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     public void onItemClick(int position, View itemView, int Id) {
         mLayoutManager.scrollToPosition(0);
         Toast.makeText(this, mNewData.stories.get(position).title, Toast.LENGTH_SHORT).show();
+    }
+
+    @OnClick(R.id.back_top)
+    public void BackTop(View view) {
+        mLayoutManager.scrollToPosition(0);
     }
 
     /**
