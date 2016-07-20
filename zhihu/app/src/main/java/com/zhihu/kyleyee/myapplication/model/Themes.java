@@ -1,6 +1,7 @@
 package com.zhihu.kyleyee.myapplication.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 主题日报列表查看
@@ -8,8 +9,8 @@ import java.io.Serializable;
  */
 public class Themes implements Serializable {
     private static final long serialVersionUID = -6795449449816820856L;
-    private int limit;
-    private ThemesList subscribed;//已订阅条目
-    private ThemesList others;//其他条目
+    public int limit;
+    public List<ThemesList> subscribed;//已订阅条目
+    public List<ThemesList> others;//其他条目
 
 }

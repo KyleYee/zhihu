@@ -6,8 +6,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,6 +33,8 @@ import com.zhihu.kyleyee.myapplication.Manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
+import com.zhihu.kyleyee.myapplication.model.Themes;
+import com.zhihu.kyleyee.myapplication.model.ThemesList;
 
 import java.util.ArrayList;
 import java.util.IllegalFormatCodePointException;
@@ -49,7 +55,10 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     RecyclerView mRecyclerHome;
     @Bind(R.id.refresh_home)
     SwipeRefreshLayout mRefreshHome;
-
+    @Bind(R.id.navigation)
+    NavigationView mNavigation;
+    @Bind(R.id.drawer)
+    DrawerLayout mDrawer;
     private New mNewData;//最新消息
     private HomeAdapter mAdapter;//最新消息适配器
     private boolean mLoadingMore = false;//正在加载更多
@@ -60,6 +69,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private View mBeforePoint;//切换前的小点
 
     private ViewPager mViewpager;
+
 
     private Handler mPagerHandler = new Handler() {
         @Override
@@ -99,6 +109,36 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         loadData();
         initToolbar();
         initRefresh();
+        initNavigation();
+    }
+
+    /**
+     * 初始化侧边导航栏
+     */
+    private void initNavigation() {
+        final Menu menu = mNavigation.getMenu();
+        ApiManager.getInstance().getThemes(new ApiManager.ResultCallBack() {
+            @Override
+            public void onTaskSuccess(Object data) {
+                Themes themes = (Themes) data;
+                if (themes != null) {
+                    for (int i = 0; i < themes.others.size(); i++) {
+                        menu.add(0, i, 0, themes.others.get(i).name).setIcon(R.drawable.ic_add_black_24dp);
+                    }
+//                    synchronized(MainActivity.this){ menu.notify();}
+                }
+            }
+
+            @Override
+            public void onError(Object error) {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        });
     }
 
 
@@ -107,17 +147,23 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
      */
     private void initToolbar() {
         setSupportActionBar(mToolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawer.openDrawer(mNavigation);
+            }
+        });
     }
 
-    /**
+/*    *//**
      * 初始化数据
-     */
+     *//*
     private void initData() {
         Intent intent = getIntent();
         mNewData = (New) intent.getBundleExtra(StartActivity.NEW_BUNDLE)
                 .getSerializable(StartActivity.NEW_BUNDLE);
         beforeDate = mNewData.date;
-    }
+    }*/
 
 
     /**
