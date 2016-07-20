@@ -1,19 +1,19 @@
-package com.zhihu.kyleyee.myapplication.Adapter;
+package com.zhihu.kyleyee.myapplication.adapter;
 
 import android.content.Context;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Stories;
+
+import java.util.Calendar;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -56,6 +56,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
         notifyItemInserted(0);
     }
 
+    public void setData(New mNewData) {
+        this.mNewData = mNewData;
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (mHeaderView == null) return TYPE_COMMENT;
@@ -87,18 +91,60 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
                 }
             }
         });
+        //设置时间
+        setDate(stories, holder, position);
+    }
+
+    //设置时间
+    private void setDate(Stories stories, HomeHolder holder, int position) {
+        if (stories.date != null) {
+            if (position == mHeadCount) {
+                holder.date.setText("今日热文");
+            } else {
+                String date = stories.date;
+                String year = date.substring(0, 4);
+                String month = date.substring(4, 6);
+                String day = date.substring(6, 8);
+                final Calendar c = Calendar.getInstance();
+                c.set(Integer.parseInt(year), Integer.parseInt(month)-1, Integer.parseInt(day));
+                String way = String.valueOf(c.get(Calendar.DAY_OF_WEEK));
+                if ("1".equals(way)) {
+                    way = "天";
+                } else if ("2".equals(way)) {
+                    way = "一";
+                } else if ("3".equals(way)) {
+                    way = "二";
+                } else if ("4".equals(way)) {
+                    way = "三";
+                } else if ("5".equals(way)) {
+                    way = "四";
+                } else if ("6".equals(way)) {
+                    way = "五";
+                } else if ("7".equals(way)) {
+                    way = "六";
+                }
+                holder.date.setText(month + "月" + day + "日" + "  " + "星期" + way);
+            }
+            holder.date.setVisibility(View.VISIBLE);
+        } else {
+            holder.date.setText("");
+            holder.date.setVisibility(View.GONE);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mHeaderView != null ? (mNewData.stories.size() + mHeadCount) : mNewData.stories.size();
+        return mHeaderView != null ? (
+                mNewData.stories.size() + mHeadCount) : mNewData.stories.size();
     }
-    
+
     class HomeHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.card_home_text)
         TextView des;
         @Bind(R.id.card_home_image)
         SimpleDraweeView image;
+        @Bind(R.id.date)
+        TextView date;
 
         public HomeHolder(View itemView) {
             super(itemView);

@@ -1,8 +1,6 @@
-package com.zhihu.kyleyee.myapplication.Manager;
+package com.zhihu.kyleyee.myapplication.manager;
 
 import android.app.Activity;
-import android.content.Context;
-import android.media.Image;
 
 /**
  * 图片加载管理类

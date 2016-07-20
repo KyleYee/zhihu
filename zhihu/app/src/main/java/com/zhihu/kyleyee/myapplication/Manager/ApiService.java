@@ -1,16 +1,13 @@
-package com.zhihu.kyleyee.myapplication.Manager;
+package com.zhihu.kyleyee.myapplication.manager;
 
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Start;
 import com.zhihu.kyleyee.myapplication.model.Themes;
-import com.zhihu.kyleyee.myapplication.model.ThemesList;
 import com.zhihu.kyleyee.myapplication.model.Version;
 
-import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Call;
-import retrofit2.http.Field;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;

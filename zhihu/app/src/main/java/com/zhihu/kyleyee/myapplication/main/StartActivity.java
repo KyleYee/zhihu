@@ -4,13 +4,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.zhihu.kyleyee.myapplication.R;
-import com.zhihu.kyleyee.myapplication.Manager.ApiManager;
+import com.zhihu.kyleyee.myapplication.manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Start;
@@ -59,6 +59,8 @@ public class StartActivity extends BaseActivity {
                 Uri uri = Uri.parse(model.getImg());
                 SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);
                 draweeView.setImageURI(uri);
+        /*        ImageView imageView = (ImageView) findViewById(R.id.start_image);
+                Glide.with(StartActivity.this).load(model.getImg()).into(imageView);*/
 
 
                 ApiManager.getInstance().getNewList(new ApiManager.ResultCallBack() {

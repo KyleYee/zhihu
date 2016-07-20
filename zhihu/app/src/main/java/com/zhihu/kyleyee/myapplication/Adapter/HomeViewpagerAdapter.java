@@ -1,4 +1,4 @@
-package com.zhihu.kyleyee.myapplication.Adapter;
+package com.zhihu.kyleyee.myapplication.adapter;
 
 import android.support.v4.view.PagerAdapter;
 import android.view.View;

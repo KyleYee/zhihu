@@ -2,7 +2,6 @@ package com.zhihu.kyleyee.myapplication.main;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,7 +9,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
@@ -22,22 +20,19 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.SizeReadyCallback;
-import com.facebook.drawee.view.SimpleDraweeView;
-import com.zhihu.kyleyee.myapplication.Adapter.HomeAdapter;
-import com.zhihu.kyleyee.myapplication.Adapter.HomeViewpagerAdapter;
-import com.zhihu.kyleyee.myapplication.Manager.ApiManager;
+import com.zhihu.kyleyee.myapplication.adapter.HomeAdapter;
+import com.zhihu.kyleyee.myapplication.adapter.HomeViewpagerAdapter;
+import com.zhihu.kyleyee.myapplication.manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Themes;
-import com.zhihu.kyleyee.myapplication.model.ThemesList;
 
 import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 
 import butterknife.Bind;
@@ -67,10 +62,13 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private List<View> mListView;//轮播图 图片集合
     private List<View> mPointView;//轮播图下方小点
     private View mBeforePoint;//切换前的小点
-
+    private int mCurrentPosition;//当前位置
+    private boolean isScrolling = false;//是否正手动在滑动
     private ViewPager mViewpager;
-
-
+    private LinearLayoutManager mLayoutManager;
+    /**
+     * 自动轮播
+     */
     private Handler mPagerHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -78,14 +76,17 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
             if (mViewpager == null) {
                 return;
             }
-            mViewpager.setCurrentItem(msg.what, true);
-            if (msg.what == mNewData.top_stories.size()) {
-                msg.what = 0;
-            } else {
-                msg.what += 1;
+            if (isScrolling) {
+                mPagerHandler.sendEmptyMessageDelayed(0, DELAY_MILLIS);
+                return;
             }
-            mPagerHandler.sendEmptyMessageDelayed(msg.what, DELAY_MILLIS);
-
+            if (mCurrentPosition == mNewData.top_stories.size() - 1) {
+                mCurrentPosition = 0;
+            } else {
+                mCurrentPosition += 1;
+            }
+            mViewpager.setCurrentItem(mCurrentPosition, true);
+            mPagerHandler.sendEmptyMessageDelayed(0, DELAY_MILLIS);
         }
     };
 
@@ -125,7 +126,6 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                     for (int i = 0; i < themes.others.size(); i++) {
                         menu.add(0, i, 0, themes.others.get(i).name).setIcon(R.drawable.ic_add_black_24dp);
                     }
-//                    synchronized(MainActivity.this){ menu.notify();}
                 }
             }
 
@@ -171,14 +171,17 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
      */
     private void initRecyclerView() {
         beforeDate = mNewData.date;
+        //设置每一天的第一个item的date值
+        mNewData.stories.get(0).date = beforeDate;
         mAdapter = new HomeAdapter(this, mNewData);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setOrientation(OrientationHelper.VERTICAL);
-        mRecyclerHome.setLayoutManager(layoutManager);
+        mAdapter.setData(mNewData);
+        mLayoutManager= new LinearLayoutManager(this);
+        mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        mRecyclerHome.setLayoutManager(mLayoutManager);
         //设置轮播图
         initViewpager();
         mAdapter.setOnItemClickListener(this);
-        loadMore(layoutManager);
+        loadMore(mLayoutManager);
         mRecyclerHome.setAdapter(mAdapter);
     }
 
@@ -203,6 +206,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                                 @Override
                                 public void onTaskSuccess(Object data) {
                                     New beforeData = (New) data;
+                                    beforeData.stories.get(0).date = beforeData.date;
                                     mNewData.stories.addAll(beforeData.stories);
                                     mAdapter.notifyDataSetChanged();
                                 }
@@ -225,9 +229,25 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                setToolbar(manager);
             }
         });
     }
+
+    private void setToolbar(LinearLayoutManager layoutManager) {
+        int currentPosition = layoutManager.findFirstVisibleItemPosition();
+        if (currentPosition == 0) {
+            mToolbar.setTitle("首页");
+            return;
+        }
+        View view = mRecyclerHome.getChildAt(0);
+        TextView date = (TextView) view.findViewById(R.id.date);
+        if (date != null && date.getText() != null && !date.getText().equals("")) {
+            mToolbar.setTitle(date.getText());
+        }
+    }
+
 
     /**
      * 初始化刷新
@@ -257,6 +277,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
                 if (mNewData != null) {
                     mListView = null;
                     mPointView = null;
+                    mCurrentPosition = 0;
                     initRecyclerView();
                 }
             }
@@ -292,7 +313,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
             View view = LayoutInflater.from(this).inflate(R.layout.item_viewpager_iamge, mViewpager, false);
             View point = LayoutInflater.from(this).inflate(R.layout.item_viewpager_point, viewpagerPoint, false);
             if (i == 0) {
-                point.setBackgroundResource(R.drawable.point_whit);
+                point.setEnabled(false);
                 mBeforePoint = point;
             }
             mPointView.add(point);
@@ -334,6 +355,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
      */
     @Override
     public void onItemClick(int position, View itemView, int Id) {
+        mLayoutManager.scrollToPosition(0);
         Toast.makeText(this, mNewData.stories.get(position).title, Toast.LENGTH_SHORT).show();
     }
 
@@ -351,14 +373,25 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
 
     @Override
     public void onPageSelected(int position) {
-        mPointView.get(position).setBackgroundResource(R.drawable.point_whit);
-        mBeforePoint.setBackgroundResource(R.drawable.point);
+        mPointView.get(position).setEnabled(false);
+        mBeforePoint.setEnabled(true);
         mBeforePoint = mPointView.get(position);
+        mCurrentPosition = position;
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
-
+        switch (state) {
+            case ViewPager.SCROLL_STATE_DRAGGING:
+                //正在拖动
+                isScrolling = true;
+                break;
+            case ViewPager.SCROLL_STATE_IDLE:
+                //没有动作的时候
+            case ViewPager.SCROLL_STATE_SETTLING:
+                //滑动完了
+                isScrolling = false;
+                break;
+        }
     }
 }
