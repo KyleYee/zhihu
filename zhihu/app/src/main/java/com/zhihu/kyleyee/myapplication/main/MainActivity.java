@@ -34,6 +34,7 @@ import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Themes;
+import com.zhihu.kyleyee.myapplication.modul.NewsContent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -384,8 +385,11 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
      */
     @Override
     public void onItemClick(int position, View itemView, int Id) {
-        mLayoutManager.scrollToPosition(0);
         Toast.makeText(this, mNewData.stories.get(position).title, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(MainActivity.this, NewsContent.class);
+        intent.putExtra("id", Id);
+        startActivity(intent);
+
     }
 
     @OnClick(R.id.back_top)

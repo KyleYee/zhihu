@@ -1,6 +1,7 @@
 package com.zhihu.kyleyee.myapplication.manager;
 
 import com.zhihu.kyleyee.myapplication.model.New;
+import com.zhihu.kyleyee.myapplication.model.NewsContentModel;
 import com.zhihu.kyleyee.myapplication.model.Start;
 import com.zhihu.kyleyee.myapplication.model.Themes;
 import com.zhihu.kyleyee.myapplication.model.Version;
@@ -187,4 +188,31 @@ public class ApiManager {
             }
         });
     }
+
+    /**
+     * 获取新闻内容
+     *
+     * @param id
+     * @param callBack
+     */
+    public void getNewsContent(int id, final ResultCallBack callBack) {
+        Call<NewsContentModel> call = apiService.getNewsContent(id);
+        call.enqueue(new Callback<NewsContentModel>() {
+            @Override
+            public void onResponse(Call<NewsContentModel> call, Response<NewsContentModel> response) {
+                if (response.isSuccessful()) {
+                    callBack.onTaskSuccess(response.body());
+                }
+                callBack.onError("error：" + response.message());
+                callBack.onFinish();
+            }
+
+            @Override
+            public void onFailure(Call<NewsContentModel> call, Throwable t) {
+                callBack.onError("error：" + t.toString());
+                callBack.onFinish();
+            }
+        });
+    }
+
 }

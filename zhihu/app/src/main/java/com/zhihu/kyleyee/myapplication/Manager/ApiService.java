@@ -1,6 +1,7 @@
 package com.zhihu.kyleyee.myapplication.manager;
 
 import com.zhihu.kyleyee.myapplication.model.New;
+import com.zhihu.kyleyee.myapplication.model.NewsContentModel;
 import com.zhihu.kyleyee.myapplication.model.Start;
 import com.zhihu.kyleyee.myapplication.model.Themes;
 import com.zhihu.kyleyee.myapplication.model.Version;
@@ -34,4 +35,7 @@ public interface ApiService {
 
     @POST("theme/{id}")
     Call<Objects> getThemeContent(@Path("id") int id);
+
+    @GET("news/{id}")
+    Call<NewsContentModel> getNewsContent(@Path("id") int id);
 }
