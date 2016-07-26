@@ -3,7 +3,9 @@ package com.zhihu.kyleyee.myapplication.manager;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.NewsContentModel;
 import com.zhihu.kyleyee.myapplication.model.Start;
+import com.zhihu.kyleyee.myapplication.model.ThemeContent;
 import com.zhihu.kyleyee.myapplication.model.Themes;
+import com.zhihu.kyleyee.myapplication.model.ThemesList;
 import com.zhihu.kyleyee.myapplication.model.Version;
 
 import java.util.Objects;
@@ -33,8 +35,8 @@ public interface ApiService {
     @GET("themes")
     Call<Themes> getThemes();
 
-    @POST("theme/{id}")
-    Call<Objects> getThemeContent(@Path("id") int id);
+    @GET("theme/{id}")
+    Call<ThemeContent> getThemeContent(@Path("id") int id);
 
     @GET("news/{id}")
     Call<NewsContentModel> getNewsContent(@Path("id") int id);

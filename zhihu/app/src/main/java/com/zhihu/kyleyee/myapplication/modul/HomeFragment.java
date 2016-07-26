@@ -1,7 +1,8 @@
-package com.zhihu.kyleyee.myapplication.main;
+package com.zhihu.kyleyee.myapplication.modul;
 
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,7 +20,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,39 +27,42 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.adapter.HomeAdapter;
 import com.zhihu.kyleyee.myapplication.adapter.HomeViewpagerAdapter;
+import com.zhihu.kyleyee.myapplication.base.BaseFragment;
 import com.zhihu.kyleyee.myapplication.manager.ApiManager;
-import com.zhihu.kyleyee.myapplication.R;
-import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.model.New;
-import com.zhihu.kyleyee.myapplication.model.Themes;
-import com.zhihu.kyleyee.myapplication.modul.NewsContent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 
 /**
- * 主界面
- * Created by kyleYee on 2016/6/29.
+ * 首页
+ * Created by yunnnn on 2016/7/26.
  */
-public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClickListener, ViewPager.OnPageChangeListener {
+public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClickListener, ViewPager.OnPageChangeListener {
+
+    //滑动监听
+    public interface ToolbarScrollListener {
+        void setTitle(String content);
+    }
+
+    private ToolbarScrollListener mToolbarScrollListener;
+
+    public void setToolbarScrollListener(ToolbarScrollListener toolbarScrollListener) {
+        this.mToolbarScrollListener = toolbarScrollListener;
+    }
 
     private static final int DELAY_MILLIS = 4000;
-    @Bind(R.id.toolbar_home)
-    Toolbar mToolbar;
+
     @Bind(R.id.recycler_home)
     RecyclerView mRecyclerHome;
     @Bind(R.id.refresh_home)
     SwipeRefreshLayout mRefreshHome;
-    @Bind(R.id.navigation)
-    NavigationView mNavigation;
-    @Bind(R.id.drawer)
-    DrawerLayout mDrawer;
     @Bind(R.id.back_top)
     FloatingActionButton mBackTop;
 
@@ -76,6 +79,8 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     private ViewPager mViewpager;
     private LinearLayoutManager mLayoutManager;
     private boolean mBackTopIsShow = false;
+    private Activity mActivity;
+
     /**
      * 自动轮播
      */
@@ -100,200 +105,17 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         }
     };
 
-    public static void startMainActivity(Context context, New newData) {
-        Intent intent = new Intent(context, MainActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(StartActivity.NEW_BUNDLE, newData);
-        intent.putExtra(StartActivity.NEW_BUNDLE, bundle);
-        context.startActivity(intent);
+
+    @Override
+    protected int getContentViewLayoutId() {
+        return R.layout.fragment_home;
     }
 
     @Override
-    protected int getContentView() {
-        return R.layout.activity_main;
-    }
-
-    @Override
-    protected void init(Bundle savedInstanceState) {
-        super.init(savedInstanceState);
-//        initData();
+    protected void init(LayoutInflater inflater, View rootView, Bundle savedInstanceState) {
+        super.init(inflater, rootView, savedInstanceState);
         loadData();
-        initToolbar();
         initRefresh();
-        initNavigation();
-    }
-
-    /**
-     * 初始化侧边导航栏
-     */
-    private void initNavigation() {
-        final Menu menu = mNavigation.getMenu();
-        ApiManager.getInstance().getThemes(new ApiManager.ResultCallBack() {
-            @Override
-            public void onTaskSuccess(Object data) {
-                Themes themes = (Themes) data;
-                if (themes != null) {
-                    for (int i = 0; i < themes.others.size(); i++) {
-                        menu.add(0, i, 0, themes.others.get(i).name).setIcon(R.drawable.ic_add_black_24dp);
-                    }
-                }
-            }
-
-            @Override
-            public void onError(Object error) {
-
-            }
-
-            @Override
-            public void onFinish() {
-
-            }
-        });
-    }
-
-
-    /**
-     * 初始化Toolbar
-     */
-    private void initToolbar() {
-        setSupportActionBar(mToolbar);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mDrawer.openDrawer(mNavigation);
-            }
-        });
-    }
-
-    /**
-     * 初始化新消息列表，ViewPager放在header中，刷新用
-     */
-    private void initRecyclerView() {
-        beforeDate = mNewData.date;
-        //设置每一天的第一个item的date值
-        mNewData.stories.get(0).date = beforeDate;
-        mAdapter = new HomeAdapter(this);
-        mAdapter.setData(mNewData.stories);
-        mLayoutManager = new LinearLayoutManager(this);
-        mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
-        mRecyclerHome.setLayoutManager(mLayoutManager);
-        //设置轮播图
-        initViewpager();
-        mAdapter.setOnItemClickListener(this);
-        loadMore(mLayoutManager);
-        mRecyclerHome.setAdapter(mAdapter);
-    }
-
-    /**
-     * 加载更多
-     *
-     * @param layoutManager
-     */
-    private void loadMore(final LinearLayoutManager layoutManager) {
-        mRecyclerHome.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    int lastPosition = layoutManager.findLastVisibleItemPosition();
-                    if (lastPosition >= layoutManager.getItemCount() - 1) {
-                        //加载更多
-                        if (!mLoadingMore) {
-                            mLoadingMore = true;
-                            beforeDate = String.valueOf(Integer.parseInt(beforeDate) - 1);
-                            ApiManager.getInstance().getNewBefore(beforeDate, new ApiManager.ResultCallBack() {
-                                @Override
-                                public void onTaskSuccess(Object data) {
-                                    New beforeData = (New) data;
-                                    beforeData.stories.get(0).date = beforeData.date;
-                                    mNewData.stories.addAll(beforeData.stories);
-                                    mAdapter.notifyDataSetChanged();
-                                }
-
-                                @Override
-                                public void onError(Object error) {
-                                }
-
-                                @Override
-                                public void onFinish() {
-                                    mLoadingMore = false;
-                                }
-
-                            });
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                setToolbar(manager);
-            }
-        });
-    }
-
-    private void setToolbar(LinearLayoutManager layoutManager) {
-        int currentPosition = layoutManager.findFirstVisibleItemPosition();
-        if (currentPosition == 0) {
-            mToolbar.setTitle("首页");
-            if (mBackTopIsShow) {
-                setGoneAnimation(mBackTop);
-                mBackTopIsShow = false;
-            }
-            return;
-        }
-
-        if (!mBackTopIsShow) {
-            setVisiblityAnimation(mBackTop);
-            mBackTopIsShow = true;
-        }
-        View view = mRecyclerHome.getChildAt(0);
-        TextView date = (TextView) view.findViewById(R.id.date);
-        if (date != null && date.getText() != null && !date.getText().equals("")) {
-            mToolbar.setTitle(date.getText());
-        }
-    }
-
-    /**
-     * 显示动画
-     *
-     * @param mBackTopIsShow
-     */
-    private void setVisiblityAnimation(FloatingActionButton mBackTopIsShow) {
-        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 0, 1);
-        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), -80);
-        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
-    }
-
-    /**
-     * 隐藏动画
-     *
-     * @param mBackTop
-     */
-    private void setGoneAnimation(FloatingActionButton mBackTop) {
-        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 1, 0);
-        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), 80);
-        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
-    }
-
-
-    /**
-     * 初始化刷新
-     */
-    private void initRefresh() {
-        mRefreshHome.setColorSchemeColors(getResources().getColor(R.color.colorPrimary),
-                getResources().getColor(R.color.colorAccent),
-                getResources().getColor(R.color.refresh));
-        mRefreshHome.setRefreshing(false);
-        mRefreshHome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                mRefreshHome.setRefreshing(true);
-                loadData();
-            }
-        });
     }
 
     /**
@@ -327,21 +149,154 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
     }
 
     /**
+     * 初始化刷新
+     */
+    private void initRefresh() {
+        mRefreshHome.setColorSchemeColors(getResources().getColor(R.color.colorPrimary),
+                getResources().getColor(R.color.colorAccent),
+                getResources().getColor(R.color.refresh));
+        mRefreshHome.setRefreshing(false);
+        mRefreshHome.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mRefreshHome.setRefreshing(true);
+                loadData();
+            }
+        });
+    }
+
+    /**
+     * 初始化新消息列表，ViewPager放在header中，刷新用
+     */
+    private void initRecyclerView() {
+        beforeDate = mNewData.date;
+        //设置每一天的第一个item的date值
+        mNewData.stories.get(0).date = beforeDate;
+        mAdapter = new HomeAdapter(getContext());
+        mAdapter.setData(mNewData.stories);
+        mLayoutManager = new LinearLayoutManager(getContext());
+        mLayoutManager.setOrientation(OrientationHelper.VERTICAL);
+        mRecyclerHome.setLayoutManager(mLayoutManager);
+        //设置轮播图
+        initViewpager();
+        mAdapter.setOnItemClickListener(this);
+        loadMore(mLayoutManager);
+        mRecyclerHome.setAdapter(mAdapter);
+    }
+
+    /**
+     * 加载更多
+     *
+     * @param layoutManager
+     */
+    private void loadMore(final LinearLayoutManager layoutManager) {
+        mRecyclerHome.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    int lastPosition = layoutManager.findLastVisibleItemPosition();
+                    if (lastPosition >= layoutManager.getItemCount() - 1) {
+                        //加载更多
+                        if (!mLoadingMore) {
+                            mLoadingMore = true;
+                            beforeDate = String.valueOf(Integer.parseInt(beforeDate) - 1);
+                            ApiManager.getInstance().getNewBefore(beforeDate, new ApiManager.ResultCallBack() {
+                                @Override
+                                public void onTaskSuccess(Object data) {
+                                    New beforeData = (New) data;
+                                    if (beforeData == null) return;
+                                    beforeData.stories.get(0).date = beforeData.date;
+                                    mNewData.stories.addAll(beforeData.stories);
+                                    mAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onError(Object error) {
+                                }
+
+                                @Override
+                                public void onFinish() {
+                                    mLoadingMore = false;
+                                }
+
+                            });
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                setToolbar(manager);
+            }
+        });
+    }
+
+    private void setToolbar(LinearLayoutManager layoutManager) {
+        int currentPosition = layoutManager.findFirstVisibleItemPosition();
+        if (currentPosition == 0) {
+//            mToolbar.setTitle("首页");
+            mToolbarScrollListener.setTitle("首页");
+            if (mBackTopIsShow) {
+                setGoneAnimation(mBackTop);
+                mBackTopIsShow = false;
+            }
+            return;
+        }
+
+        if (!mBackTopIsShow) {
+            setVisiblityAnimation(mBackTop);
+            mBackTopIsShow = true;
+        }
+        View view = mRecyclerHome.getChildAt(0);
+        TextView date = (TextView) view.findViewById(R.id.date);
+        if (date != null && date.getText() != null && !date.getText().equals("")) {
+            mToolbarScrollListener.setTitle(date.getText() + "");
+        }
+    }
+
+    /**
+     * 显示动画
+     *
+     * @param mBackTop
+     */
+    private void setVisiblityAnimation(FloatingActionButton mBackTop) {
+        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 0, 1);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), -80);
+        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
+    }
+
+    /**
+     * 隐藏动画
+     *
+     * @param mBackTop
+     */
+    private void setGoneAnimation(FloatingActionButton mBackTop) {
+        PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 1, 0);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), 80);
+        ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
+    }
+
+
+    /**
      * 初始化轮播图
      */
     private void initViewpager() {
         //要添加带轮播图上的图片
         mListView = new ArrayList<>();
         mPointView = new ArrayList<>();
-        View pagerLayout = LayoutInflater.from(this).inflate(R.layout.item_home_viewpager, null);
+        View pagerLayout = LayoutInflater.from(mContext).inflate(R.layout.item_home_viewpager, null);
         mViewpager = (ViewPager) pagerLayout.findViewById(R.id.home_viewpager);
         LinearLayout viewpagerPoint = (LinearLayout) pagerLayout.findViewById(R.id.ll_viewpager_point);
 
-        int with = getWindowManager().getDefaultDisplay().getWidth();
+        int with = getActivity().getWindowManager().getDefaultDisplay().getWidth();
         float height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 200, getResources().getDisplayMetrics());
         for (int i = 0; i < mNewData.top_stories.size(); i++) {
-            View view = LayoutInflater.from(this).inflate(R.layout.item_viewpager_iamge, mViewpager, false);
-            View point = LayoutInflater.from(this).inflate(R.layout.item_viewpager_point, viewpagerPoint, false);
+            View view = LayoutInflater.from(getContext()).inflate(R.layout.item_viewpager_iamge, mViewpager, false);
+            View point = LayoutInflater.from(mContext).inflate(R.layout.item_viewpager_point, viewpagerPoint, false);
             if (i == 0) {
                 point.setEnabled(false);
                 mBeforePoint = point;
@@ -371,6 +326,7 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
         setAutoPlay();
     }
 
+
     //自动轮播
     private void setAutoPlay() {
         mPagerHandler.sendEmptyMessageDelayed(1, DELAY_MILLIS);
@@ -385,11 +341,9 @@ public class MainActivity extends BaseActivity implements HomeAdapter.OnItemClic
      */
     @Override
     public void onItemClick(int position, View itemView, int Id) {
-        Toast.makeText(this, mNewData.stories.get(position).title, Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(MainActivity.this, NewsContent.class);
+        Intent intent = new Intent(getContext(), NewsContent.class);
         intent.putExtra("id", Id);
         startActivity(intent);
-
     }
 
     @OnClick(R.id.back_top)

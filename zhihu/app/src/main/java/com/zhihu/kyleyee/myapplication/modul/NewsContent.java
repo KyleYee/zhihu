@@ -2,11 +2,24 @@ package com.zhihu.kyleyee.myapplication.modul;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
+import com.zhihu.kyleyee.myapplication.main.AppContent;
 import com.zhihu.kyleyee.myapplication.manager.ApiManager;
 import com.zhihu.kyleyee.myapplication.model.NewsContentModel;
 
@@ -20,8 +33,24 @@ public class NewsContent extends BaseActivity {
 
     @Bind(R.id.webView)
     WebView mWebView;
+    @Bind(R.id.image_new_content)
+    ImageView mBackground;
+    @Bind(R.id.toolbar)
+    Toolbar mToolbar;
+    @Bind(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+    @Bind(R.id.new_content_text)
+    TextView mNewContentTitle;
+
     //获取下来的数据
     private NewsContentModel mNewsContent;
+    private RequestQueue mQueue;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(AppContent.SAVE_INSTANCE_NEW_CONTENT_DATA, mNewsContent);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     protected int getContentView() {
@@ -31,8 +60,24 @@ public class NewsContent extends BaseActivity {
     @Override
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
+        if (savedInstanceState != null) {
+            mNewsContent = (NewsContentModel) savedInstanceState
+                    .getSerializable(AppContent.SAVE_INSTANCE_NEW_CONTENT_DATA);
+
+        }
+        if (mNewsContent != null) {
+            setToolBar();
+            setWebView();
+        } else {
+            loadData();
+        }
+    }
+
+    private void loadData() {
         Intent intent = getIntent();
         int id = intent.getIntExtra("id", 0);
+        mQueue = Volley.newRequestQueue(getApplicationContext());
+
         ApiManager.getInstance().getNewsContent(id, new ApiManager.ResultCallBack() {
             @Override
             public void onTaskSuccess(Object data) {
@@ -40,6 +85,7 @@ public class NewsContent extends BaseActivity {
                 if (mNewsContent == null) {
                     return;
                 }
+                setToolBar();
                 setWebView();
             }
 
@@ -56,6 +102,20 @@ public class NewsContent extends BaseActivity {
     }
 
     /**
+     * 设置toolbar
+     */
+    private void setToolBar() {
+        mNewContentTitle.setText(mNewsContent.title);
+        Glide.with(this).load(mNewsContent.image).override(100, 100).into(mBackground);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+    }
+
+    /**
      * 设置webView
      */
     private void setWebView() {
@@ -67,9 +127,24 @@ public class NewsContent extends BaseActivity {
         mWebView.getSettings().setDatabaseEnabled(true);
         // 开启Application Cache功能
         mWebView.getSettings().setAppCacheEnabled(true);
-        String css = "<link rel=\"stylesheet\" href=\"file:///android_asset/css/news.css\" type=\"text/css\">";
-        String html = "<html><head>" + css + "</head><body>" + mNewsContent.body + "</body></html>";
-        html = html.replace("<div class=\"img-place-holder\">", "");
-        mWebView.loadDataWithBaseURL("x-data://base", html, "text/html", "UTF-8", null);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, mNewsContent.css.get(0), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                String css = response;
+                if (css != null) {
+                    String html = "<html><head><style type=\"text/css\">" + css + "</style></head><body>" + mNewsContent.body + "</body></html>";
+                    html = html.replace("<div class=\"img-place-holder\">", "");
+                    mWebView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        mQueue.add(stringRequest);
     }
+
+
 }

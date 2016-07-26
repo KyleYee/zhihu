@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".main.MainActivity"></activity>
         <activity android:name=".modul.NewsContent"></activity>
+        <activity android:name=".main.CopyMainActivity"></activity>
     </application>
 
 </manifest>

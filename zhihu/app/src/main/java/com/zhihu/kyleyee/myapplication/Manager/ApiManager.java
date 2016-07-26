@@ -3,7 +3,9 @@ package com.zhihu.kyleyee.myapplication.manager;
 import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.NewsContentModel;
 import com.zhihu.kyleyee.myapplication.model.Start;
+import com.zhihu.kyleyee.myapplication.model.ThemeContent;
 import com.zhihu.kyleyee.myapplication.model.Themes;
+import com.zhihu.kyleyee.myapplication.model.ThemesList;
 import com.zhihu.kyleyee.myapplication.model.Version;
 
 import retrofit2.Call;
@@ -209,6 +211,32 @@ public class ApiManager {
 
             @Override
             public void onFailure(Call<NewsContentModel> call, Throwable t) {
+                callBack.onError("error：" + t.toString());
+                callBack.onFinish();
+            }
+        });
+    }
+
+    /**
+     * 获取主题列表
+     *
+     * @param id
+     * @param callBack
+     */
+    public void getThemeContent(int id, final ResultCallBack callBack) {
+        Call<ThemeContent> call = apiService.getThemeContent(id);
+        call.enqueue(new Callback<ThemeContent>() {
+            @Override
+            public void onResponse(Call<ThemeContent> call, Response<ThemeContent> response) {
+                if (response.isSuccessful()) {
+                    callBack.onTaskSuccess(response.body());
+                }
+                callBack.onError("error：" + response.message());
+                callBack.onFinish();
+            }
+
+            @Override
+            public void onFailure(Call<ThemeContent> call, Throwable t) {
                 callBack.onError("error：" + t.toString());
                 callBack.onFinish();
             }

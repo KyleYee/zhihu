@@ -1,6 +1,7 @@
 package com.zhihu.kyleyee.myapplication.model;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 主题内容
@@ -8,11 +9,11 @@ import java.io.Serializable;
  */
 public class ThemeContent implements Serializable {
     private static final long serialVersionUID = 1434595093415641905L;
-    private Stories stories;// 该主题日报中的文章列表
-    private String description;//该主题日报的介绍
-    private String background;//该主题日报的背景图片（大图）
-    private int color;
-    private String name;//该主题日报的名称
-    private String image;// 背景图片的小图版本
-    private String image_source;//图像的版权信息
+    public List<Stories> stories;// 该主题日报中的文章列表
+    public String description;//该主题日报的介绍
+    public String background;//该主题日报的背景图片（大图）
+    public int color;
+    public String name;//该主题日报的名称
+    public String image;// 背景图片的小图版本
+    public String image_source;//图像的版权信息
 }

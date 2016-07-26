@@ -14,6 +14,7 @@ import com.zhihu.kyleyee.myapplication.model.New;
 import com.zhihu.kyleyee.myapplication.model.Stories;
 
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -39,13 +40,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
         this.mOnItemClickListener = onItemClickListener;
     }
 
-    private New mNewData;//最新消息数据
+    private List<Stories> mData;
     private Context mContext;
     private LayoutInflater mInflater;
     private View mHeaderView;
 
-    public HomeAdapter(Context context, New newData) {
-        this.mNewData = newData;
+    public HomeAdapter(Context context ){
         this.mContext = context;
         mInflater = LayoutInflater.from(mContext);
     }
@@ -56,8 +56,8 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
         notifyItemInserted(0);
     }
 
-    public void setData(New mNewData) {
-        this.mNewData = mNewData;
+    public void setData(List<Stories> data) {
+        this.mData = data;
     }
 
     @Override
@@ -80,8 +80,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
         if (mHeaderView != null && getItemViewType(position) == TYPE_HEADER) {
             return;
         }
-        final Stories stories = mNewData.stories.get(position - mHeadCount);
-        holder.image.setImageURI(Uri.parse(stories.images.get(0)));
+        final Stories stories = mData.get(position - mHeadCount);
+        if (stories.images != null && stories.images.size() != 0) {
+            holder.image.setImageURI(Uri.parse(stories.images.get(0)));
+            holder.image.setVisibility(View.VISIBLE);
+        } else {
+            holder.image.setVisibility(View.GONE);
+        }
         holder.des.setText(stories.title);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -106,7 +111,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
                 String month = date.substring(4, 6);
                 String day = date.substring(6, 8);
                 final Calendar c = Calendar.getInstance();
-                c.set(Integer.parseInt(year), Integer.parseInt(month)-1, Integer.parseInt(day));
+                c.set(Integer.parseInt(year), Integer.parseInt(month) - 1, Integer.parseInt(day));
                 String way = String.valueOf(c.get(Calendar.DAY_OF_WEEK));
                 if ("1".equals(way)) {
                     way = "天";
@@ -135,7 +140,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeHolder> {
     @Override
     public int getItemCount() {
         return mHeaderView != null ? (
-                mNewData.stories.size() + mHeadCount) : mNewData.stories.size();
+                mData.size() + mHeadCount) : mData.size();
     }
 
     class HomeHolder extends RecyclerView.ViewHolder {

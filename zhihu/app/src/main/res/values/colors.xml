@@ -7,7 +7,9 @@
     <color name="black">#000000</color>
     <color name="grey">#838b8787</color>
     <color name="white">#ffffff</color>
+    <color name="new_title_start_color">#00ffffff</color>
     <color name="start_text">#e2ece9e9</color>
     <color name="card_text">#333333</color>
     <color name="page_bg">#f3f3f3</color>
+    <color name="new_title_end_color">#80000000</color>
 </resources>

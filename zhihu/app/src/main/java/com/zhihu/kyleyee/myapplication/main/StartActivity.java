@@ -36,7 +36,7 @@ public class StartActivity extends BaseActivity {
             super.handleMessage(msg);
             Bundle bundle = msg.getData();
             New newData = (New) bundle.getSerializable(NEW_BUNDLE);
-            MainActivity.startMainActivity(StartActivity.this, newData);
+            CopyMainActivity.startMainActivity(StartActivity.this, newData);
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
             finish();
         }
