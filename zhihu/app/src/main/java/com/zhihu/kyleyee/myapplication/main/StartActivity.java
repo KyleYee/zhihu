@@ -4,10 +4,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.manager.ApiManager;
@@ -36,7 +34,7 @@ public class StartActivity extends BaseActivity {
             super.handleMessage(msg);
             Bundle bundle = msg.getData();
             New newData = (New) bundle.getSerializable(NEW_BUNDLE);
-            CopyMainActivity.startMainActivity(StartActivity.this, newData);
+            MainActivity.startMainActivity(StartActivity.this, newData);
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
             finish();
         }

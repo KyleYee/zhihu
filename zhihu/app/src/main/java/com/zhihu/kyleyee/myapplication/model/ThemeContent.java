@@ -16,4 +16,5 @@ public class ThemeContent implements Serializable {
     public String name;//该主题日报的名称
     public String image;// 背景图片的小图版本
     public String image_source;//图像的版权信息
+    public List<Editor> editors;//该主题日报的编辑（『用户推荐日报』中此项的指是一个空数组，在 App 中的主编栏显示为『许多人』，点击后访问该主题日报的介绍页面，请留意）
 }

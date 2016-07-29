@@ -341,9 +341,7 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
      */
     @Override
     public void onItemClick(int position, View itemView, int Id) {
-        Intent intent = new Intent(getContext(), NewsContent.class);
-        intent.putExtra("id", Id);
-        startActivity(intent);
+        NewsContent.StartActivity(getActivity(), Id);
     }
 
     @OnClick(R.id.back_top)

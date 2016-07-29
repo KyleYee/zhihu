@@ -1,16 +1,12 @@
 package com.zhihu.kyleyee.myapplication.modul;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,7 +14,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
 import com.zhihu.kyleyee.myapplication.R;
 import com.zhihu.kyleyee.myapplication.base.BaseActivity;
 import com.zhihu.kyleyee.myapplication.main.AppConstants;
@@ -31,25 +26,20 @@ import butterknife.Bind;
  * 新闻内容显示
  * Created by kyleYee on 2016/7/20.
  */
-public class NewsContent extends BaseActivity {
+public class ThemeContentActivity extends BaseActivity {
 
     @Bind(R.id.webView)
     WebView mWebView;
-    @Bind(R.id.image_new_content)
-    ImageView mBackground;
     @Bind(R.id.toolbar)
     Toolbar mToolbar;
-    @Bind(R.id.collapsing_toolbar)
-    CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @Bind(R.id.new_content_text)
-    TextView mNewContentTitle;
+
 
     //获取下来的数据
     private NewsContentModel mNewsContent;
     private RequestQueue mQueue;
 
     public static void StartActivity(Activity context, int Id) {
-        Intent intent = new Intent(context, NewsContent.class);
+        Intent intent = new Intent(context, ThemeContentActivity.class);
         intent.putExtra("id", Id);
         context.startActivity(intent);
     }
@@ -62,7 +52,7 @@ public class NewsContent extends BaseActivity {
 
     @Override
     protected int getContentView() {
-        return R.layout.activity_news_content;
+        return R.layout.activity_common_content;
     }
 
     @Override
@@ -113,8 +103,6 @@ public class NewsContent extends BaseActivity {
      * 设置toolbar
      */
     private void setToolBar() {
-        mNewContentTitle.setText(mNewsContent.title);
-        Glide.with(this).load(mNewsContent.image).centerCrop().into(mBackground);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

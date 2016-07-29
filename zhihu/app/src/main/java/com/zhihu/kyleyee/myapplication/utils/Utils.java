@@ -17,11 +17,11 @@ public class Utils {
     }
 
     //像素转dp
-    public static int pxToDp(int px, Activity activity) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, activity.getResources().getDisplayMetrics());
+    public static int pxToDp(int px, Context context) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, context.getResources().getDisplayMetrics());
     }
 
-    public static int pxToSp(int px,Activity activity){
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,px,activity.getResources().getDisplayMetrics());
+    public static int pxToSp(int px,Context context){
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,px,context.getResources().getDisplayMetrics());
     }
 }
