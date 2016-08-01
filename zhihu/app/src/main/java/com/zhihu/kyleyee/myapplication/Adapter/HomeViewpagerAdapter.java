@@ -1,8 +1,15 @@
 package com.zhihu.kyleyee.myapplication.adapter;
 
+import android.app.Activity;
+import android.content.Context;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.zhihu.kyleyee.myapplication.model.New;
+import com.zhihu.kyleyee.myapplication.model.Stories;
+import com.zhihu.kyleyee.myapplication.modul.NewsContent;
 
 import java.util.List;
 
@@ -13,10 +20,15 @@ import java.util.List;
 public class HomeViewpagerAdapter extends PagerAdapter {
 
     private List<View> mListView;
+    private Activity mActivity;
+    private List<Stories> mData;
 
-    public HomeViewpagerAdapter(List<View> mListView) {
+    public HomeViewpagerAdapter(List<View> mListView, Activity activity, List<Stories> data) {
         this.mListView = mListView;
+        this.mActivity = activity;
+        this.mData = data;
     }
+
 
     @Override
     public int getCount() {
@@ -30,8 +42,16 @@ public class HomeViewpagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(final ViewGroup container, final int position) {
         container.addView(mListView.get(position));
+        mListView.get(position).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mData == null) return;
+
+                NewsContent.StartActivity(mActivity, mData.get(position).id);
+            }
+        });
         return mListView.get(position);
     }
 

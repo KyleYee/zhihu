@@ -170,6 +170,7 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
      */
     private void initRecyclerView() {
         beforeDate = mNewData.date;
+        getCurrentDate(beforeDate);
         //设置每一天的第一个item的date值
         mNewData.stories.get(0).date = beforeDate;
         mAdapter = new HomeAdapter(getContext());
@@ -182,6 +183,17 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
         mAdapter.setOnItemClickListener(this);
         loadMore(mLayoutManager);
         mRecyclerHome.setAdapter(mAdapter);
+    }
+
+    /**
+     * 获取当前时间
+     * @param beforeDate
+     */
+    private void getCurrentDate(String beforeDate) {
+        String day = beforeDate.substring(7,8);
+        if (day.equals("01")){
+
+        }
     }
 
     /**
@@ -305,23 +317,24 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
             mListView.add(view);
             viewpagerPoint.addView(point);
         }
-        mViewpagerAdapter = new HomeViewpagerAdapter(mListView);
+        mViewpagerAdapter = new HomeViewpagerAdapter(mListView, getActivity(), mNewData.top_stories);
         //有Viewpager的布局
 //        ViewPager viewpager = (ViewPager) findViewById(R.id.viewpager);
         mViewpager.setAdapter(mViewpagerAdapter);
         mAdapter.setHeaderView(pagerLayout);
         for (int i = 0; i < mNewData.top_stories.size(); i++) {
-            ImageView draweeView = (ImageView) mListView.get(i).findViewById(R.id.home_viewpager_image);
+            ImageView imageView = (ImageView) mListView.get(i).findViewById(R.id.home_viewpager_image);
+            TextView textView = (TextView) mListView.get(i).findViewById(R.id.title_name);
+            textView.setText(mNewData.top_stories.get(i).title);
             Glide.with(this)
                     .load(mNewData.top_stories.get(i).image)
                     .override(with, (int) height)
                     .centerCrop()
-                    .into(draweeView);
+                    .into(imageView);
         }
 
         //设置viewpager监听事件
         mViewpager.addOnPageChangeListener(this);
-
         //设置自动轮播
         setAutoPlay();
     }
