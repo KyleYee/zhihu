@@ -124,9 +124,10 @@ public class ThemeCommonFragment extends BaseFragment implements HomeAdapter.OnI
     public void onItemClick(int position, View itemView, int Id) {
         if (mThemeContent.stories.get(position).images != null
                 && mThemeContent.stories.get(position).images.size() != 0) {
-            NewsContent.StartActivity(getActivity(), Id);
+            NewsContent.StartActivity(getActivity(), Id, mThemeContent.stories.get(position).images.get(0));
         } else {
             ThemeContentActivity.StartActivity(getActivity(), Id);
         }
     }
+
 }

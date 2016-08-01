@@ -9,4 +9,5 @@ public class AppConstants {
     public static final String SAVE_INSTANCE_NEW_CONTENT_DATA = "save_instance_new_content_data";
     //ThemeCommonFragment页面状态保存
     public static final String SAVE_INSTANCE_THEME_COMMON_DATA = "save_instance_theme_common_data";
+    public static final String SAVE_INSTANCE_THEME_IMAGE_URL = "save_instance_theme_image_url";
 }

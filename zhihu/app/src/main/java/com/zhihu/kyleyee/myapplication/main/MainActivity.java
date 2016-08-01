@@ -44,12 +44,10 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
     private ThemeCommonFragment mFragment;
     private HomeFragment mHomeFragment;
     private Themes mThemes;
+    private boolean isHomeFragment = true;
 
-    public static void startMainActivity(Context context, New newData) {
+    public static void startMainActivity(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable(StartActivity.NEW_BUNDLE, newData);
-        intent.putExtra(StartActivity.NEW_BUNDLE, bundle);
         context.startActivity(intent);
     }
 
@@ -124,9 +122,11 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
                     fragmentTransaction.replace(R.id.framgent, mHomeFragment);
                     fragmentTransaction.commit();
                     mToolbar.setTitle("首页");
+                    isHomeFragment = true;
                 } else {
                     if (mThemes == null)
                         return false;
+                    isHomeFragment = false;
                     mToolbar.setTitle(item.getTitle());
                     FragmentTransaction commonTransaction = mFragmentManager.beginTransaction();
                     commonTransaction.replace(R.id.framgent, mListFragment.get(item.getItemId()));
@@ -158,5 +158,18 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
     public void setTitle(String content) {
         if (content == null) return;
         mToolbar.setTitle(content);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!isHomeFragment) {
+            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.framgent, mHomeFragment);
+            fragmentTransaction.commit();
+            mToolbar.setTitle("首页");
+            isHomeFragment = true;
+            return;
+        }
+        super.onBackPressed();
     }
 }

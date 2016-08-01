@@ -47,6 +47,8 @@ public class NewsContent extends BaseActivity {
     //获取下来的数据
     private NewsContentModel mNewsContent;
     private RequestQueue mQueue;
+    private String mImageUrl;
+
 
     public static void StartActivity(Activity context, int Id) {
         Intent intent = new Intent(context, NewsContent.class);
@@ -54,9 +56,18 @@ public class NewsContent extends BaseActivity {
         context.startActivity(intent);
     }
 
+    public static void StartActivity(Activity activity, int Id, String imageUrl) {
+
+        Intent intent = new Intent(activity, NewsContent.class);
+        intent.putExtra("id", Id);
+        intent.putExtra("imageUrl", imageUrl);
+        activity.startActivity(intent);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putSerializable(AppConstants.SAVE_INSTANCE_NEW_CONTENT_DATA, mNewsContent);
+        outState.putString(AppConstants.SAVE_INSTANCE_THEME_IMAGE_URL, mImageUrl);
         super.onSaveInstanceState(outState);
     }
 
@@ -71,6 +82,8 @@ public class NewsContent extends BaseActivity {
         if (savedInstanceState != null) {
             mNewsContent = (NewsContentModel) savedInstanceState
                     .getSerializable(AppConstants.SAVE_INSTANCE_NEW_CONTENT_DATA);
+            mImageUrl = savedInstanceState
+                    .getString(AppConstants.SAVE_INSTANCE_THEME_IMAGE_URL);
 
         }
         if (mNewsContent != null) {
@@ -84,6 +97,7 @@ public class NewsContent extends BaseActivity {
     private void loadData() {
         Intent intent = getIntent();
         int id = intent.getIntExtra("id", 0);
+        mImageUrl = intent.getStringExtra("imageUrl");
         mQueue = Volley.newRequestQueue(getApplicationContext());
 
         ApiManager.getInstance().getNewsContent(id, new ApiManager.ResultCallBack() {
@@ -114,7 +128,13 @@ public class NewsContent extends BaseActivity {
      */
     private void setToolBar() {
         mNewContentTitle.setText(mNewsContent.title);
-        Glide.with(this).load(mNewsContent.image).centerCrop().into(mBackground);
+
+        if (mImageUrl != null) {
+            Glide.with(this).load(mImageUrl).centerCrop().into(mBackground);
+        } else {
+            Glide.with(this).load(mNewsContent.image).centerCrop().into(mBackground);
+        }
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

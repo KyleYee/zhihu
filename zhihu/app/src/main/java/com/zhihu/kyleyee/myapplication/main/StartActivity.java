@@ -32,9 +32,7 @@ public class StartActivity extends BaseActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            Bundle bundle = msg.getData();
-            New newData = (New) bundle.getSerializable(NEW_BUNDLE);
-            MainActivity.startMainActivity(StartActivity.this, newData);
+            MainActivity.startMainActivity(StartActivity.this);
             overridePendingTransition(R.anim.anim_in, R.anim.anim_out);
             finish();
         }
@@ -48,6 +46,10 @@ public class StartActivity extends BaseActivity {
     @Override
     protected void init(Bundle savedInstanceState) {
         super.init(savedInstanceState);
+        loadData();
+    }
+
+    public void loadData() {
         ApiManager.getInstance().getStartImg(new ApiManager.ResultCallBack() {
 
             @Override
@@ -59,7 +61,6 @@ public class StartActivity extends BaseActivity {
                 draweeView.setImageURI(uri);
         /*        ImageView imageView = (ImageView) findViewById(R.id.start_image);
                 Glide.with(StartActivity.this).load(model.getImg()).into(imageView);*/
-
 
                 ApiManager.getInstance().getNewList(new ApiManager.ResultCallBack() {
                     @Override
@@ -89,7 +90,9 @@ public class StartActivity extends BaseActivity {
 
             @Override
             public void onError(Object error) {
+                Message message = new Message();
 
+                handler.sendMessageDelayed(message, 2000);
             }
 
             @Override
@@ -97,6 +100,5 @@ public class StartActivity extends BaseActivity {
 
             }
         });
-
     }
 }
