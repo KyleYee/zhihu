@@ -170,7 +170,6 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
      */
     private void initRecyclerView() {
         beforeDate = mNewData.date;
-        getCurrentDate(beforeDate);
         //设置每一天的第一个item的date值
         mNewData.stories.get(0).date = beforeDate;
         mAdapter = new HomeAdapter(getContext());
@@ -187,12 +186,72 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
 
     /**
      * 获取当前时间
+     *
      * @param beforeDate
      */
-    private void getCurrentDate(String beforeDate) {
-        String day = beforeDate.substring(7,8);
-        if (day.equals("01")){
+    private String getCurrentDate(String beforeDate) {
+        String year = beforeDate.substring(0, 4);
+        String mouth = beforeDate.substring(4, 6);
+        String day = beforeDate.substring(6, 8);
+        if (day.equals("01")) {
+            switch (mouth) {
+                case "01":
+                    year = String.valueOf((Integer.parseInt(year) - 1));
+                    mouth = "12";
+                    day = "31";
+                    break;
+                case "02":
+                    mouth = "01";
+                    day = "31";
+                    break;
+                case "03":
+                    if (Integer.parseInt(year) % 4 == 0) {
+                        day = "29";
+                    } else {
+                        day = "28";
+                    }
+                    mouth = "02";
+                    break;
+                case "04":
+                    mouth = "03";
+                    day = "31";
+                    break;
+                case "05":
+                    mouth = "04";
+                    day = "30";
+                    break;
+                case "06":
+                    mouth = "05";
+                    day = "31";
+                    break;
+                case "07":
+                    mouth = "06";
+                    day = "30";
+                    break;
+                case "08":
+                    mouth = "07";
+                    day = "31";
+                    break;
+                case "09":
+                    mouth = "08";
+                    day = "31";
+                    break;
+                case "10":
+                    mouth = "09";
+                    day = "30";
+                    break;
+                case "11":
+                    mouth = "10";
+                    day = "31";
+                case "12":
+                    mouth = "11";
+                    day = "30";
+                    break;
+            }
+            return year + mouth + day;
 
+        } else {
+            return String.valueOf((Integer.parseInt(beforeDate) - 1));
         }
     }
 
@@ -212,7 +271,7 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
                         //加载更多
                         if (!mLoadingMore) {
                             mLoadingMore = true;
-                            beforeDate = String.valueOf(Integer.parseInt(beforeDate) - 1);
+                            beforeDate = getCurrentDate(beforeDate);
                             ApiManager.getInstance().getNewBefore(beforeDate, new ApiManager.ResultCallBack() {
                                 @Override
                                 public void onTaskSuccess(Object data) {

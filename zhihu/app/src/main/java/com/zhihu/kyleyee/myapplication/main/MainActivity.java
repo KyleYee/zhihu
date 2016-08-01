@@ -145,6 +145,7 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
      */
     private void initToolbar() {
         setSupportActionBar(mToolbar);
+
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,5 +172,27 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
             return;
         }
         super.onBackPressed();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.isCheckable()) {
+            item.setChecked(true);
+        }
+        switch (item.getItemId()) {
+            case R.id.day_model:
+                break;
+            case R.id.settings:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
