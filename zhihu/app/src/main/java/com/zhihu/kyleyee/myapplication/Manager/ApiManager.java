@@ -15,7 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
- * 网络请求  采用单列模式
+ * 网络请求  采用单例模式
  * Created by kyleYee on 2016/6/24.
  */
 public class ApiManager {
