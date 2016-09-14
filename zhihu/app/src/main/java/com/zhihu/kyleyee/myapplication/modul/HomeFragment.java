@@ -79,7 +79,6 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
     private ViewPager mViewpager;
     private LinearLayoutManager mLayoutManager;
     private boolean mBackTopIsShow = false;
-    private Activity mActivity;
 
     /**
      * 自动轮播
@@ -92,9 +91,10 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
                 return;
             }
             if (isScrolling) {
-                mPagerHandler.sendEmptyMessageDelayed(0, DELAY_MILLIS);
+                mPagerHandler.sendEmptyMessage(0);
                 return;
             }
+
             if (mCurrentPosition == mNewData.top_stories.size() - 1) {
                 mCurrentPosition = 0;
             } else {
@@ -309,7 +309,6 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
     private void setToolbar(LinearLayoutManager layoutManager) {
         int currentPosition = layoutManager.findFirstVisibleItemPosition();
         if (currentPosition == 0) {
-//            mToolbar.setTitle("首页");
             mToolbarScrollListener.setTitle("首页");
             if (mBackTopIsShow) {
                 setGoneAnimation(mBackTop);
@@ -336,7 +335,7 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
      */
     private void setVisiblityAnimation(FloatingActionButton mBackTop) {
         PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 0, 1);
-        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), -80);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), -30);
         ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
     }
 
@@ -347,7 +346,7 @@ public class HomeFragment extends BaseFragment implements HomeAdapter.OnItemClic
      */
     private void setGoneAnimation(FloatingActionButton mBackTop) {
         PropertyValuesHolder pvA = PropertyValuesHolder.ofFloat("alpha", 1, 0);
-        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), 80);
+        PropertyValuesHolder pvT = PropertyValuesHolder.ofFloat("translationY", mBackTop.getTranslationY(), 30);
         ObjectAnimator.ofPropertyValuesHolder(mBackTop, pvA, pvT).setDuration(800).start();
     }
 

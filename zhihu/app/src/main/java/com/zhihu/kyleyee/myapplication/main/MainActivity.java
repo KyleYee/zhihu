@@ -91,7 +91,7 @@ public class MainActivity extends BaseActivity implements HomeFragment.ToolbarSc
                         bundle.putSerializable("themes", mThemes.others.get(i));
                         mFragment.setArguments(bundle);
                         mListFragment.add(mFragment);
-                        menu.add(0, i, 0, mThemes.others.get(i).name).setIcon(R.drawable.ic_add_black_24dp);
+                        menu.add(0, i, 0, mThemes.others.get(i).name);
                     }
                 }
             }
